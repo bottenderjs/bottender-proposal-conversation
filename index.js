@@ -25,13 +25,13 @@ function beginDialog(name) {
       };
 
       context.setState({
-        $bottender: {
+        bottender: {
           lock,
         },
       });
     } else {
       context.setState({
-        $bottender: {
+        bottender: {
           lock: null,
         },
       });
@@ -54,7 +54,7 @@ function continueDialog(Fn) {
     // TODO: we should handle more use case here
     if (!context.event.isText) {
       context.setState({
-        $bottender: {
+        bottender: {
           lock: null,
         },
       });
@@ -62,7 +62,7 @@ function continueDialog(Fn) {
       return Fn;
     }
 
-    const stateLock = get(context.state, '$bottender.lock');
+    const stateLock = get(context.state, 'bottender.lock');
 
     const { dialog, step, props } = stateLock;
     const { property } = stateLock.prompt;
@@ -93,13 +93,13 @@ function continueDialog(Fn) {
       };
 
       context.setState({
-        $bottender: {
+        bottender: {
           lock,
         },
       });
     } else {
       context.setState({
-        $bottender: {
+        bottender: {
           lock: null,
         },
       });
@@ -125,7 +125,7 @@ function prompt(property, { props } = {}) {
 
 function run(Fn) {
   return async context => {
-    const lock = get(context.state, '$bottender.lock');
+    const lock = get(context.state, 'bottender.lock');
 
     let nextDialog;
 

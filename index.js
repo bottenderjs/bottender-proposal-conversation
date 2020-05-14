@@ -1,152 +1,143 @@
 const _debug = require('debug');
 const get = require('lodash/get');
 
-const debug = _debug('bottender:proposal:multi-turns');
+const debugAction = _debug('bottender:proposal:conversation');
 
-const dialogs = {};
+const actions = {};
 
-function beginDialog(name) {
-  const step0 = dialogs[name][0];
+/**
+ * Register and get action
+ */
+function registerAction(name, action) {
+  actions[name] = action;
+}
 
-  return async (context, props) => {
-    const probablyPrompt = await step0(context, props);
+function getAction(name) {
+  return function SetCurrentAction(context, props) {
+    // FIXME: avoid using state to label current action
+    context.setState({ currentAction: name });
 
-    if (probablyPrompt && probablyPrompt.isPrompt) {
-      const lock = {
-        dialog: name,
-        step: 0,
-        props: {
-          ...props,
-          ...probablyPrompt.props,
-        },
-        prompt: {
-          property: probablyPrompt.property,
-        },
-      };
-
-      context.setState({
-        bottender: {
-          lock,
-        },
-      });
-    } else {
-      context.setState({
-        bottender: {
-          lock: null,
-        },
-      });
-    }
-
-    return probablyPrompt;
+    return actions[name](context, props);
   };
 }
 
-function addDialog(name, steps) {
-  dialogs[name] = steps;
+/**
+ * Prompt data structure
+ */
 
-  return beginDialog(name);
-}
-
-function continueDialog(Fn) {
-  let dialogName;
-
-  const nextStep = async context => {
-    // TODO: we should handle more use case here
-    if (!context.event.isText) {
-      context.setState({
-        bottender: {
-          lock: null,
-        },
-      });
-
-      return Fn;
-    }
-
-    const stateLock = get(context.state, 'bottender.lock');
-
-    const { dialog, step, props } = stateLock;
-    const { property } = stateLock.prompt;
-
-    const nextStepIndex = step + 1;
-    const stepN = dialogs[dialog][nextStepIndex];
-
-    dialogName = stepN.name;
-
-    const probablyPrompt = await stepN(context, {
-      ...props,
-      prompt: {
-        [property]: context.event.text,
-      },
-    });
-
-    if (probablyPrompt && probablyPrompt.isPrompt) {
-      const lock = {
-        dialog,
-        step: nextStepIndex,
-        props: {
-          ...props,
-          ...probablyPrompt.props,
-        },
-        prompt: {
-          property: probablyPrompt.property,
-        },
-      };
-
-      context.setState({
-        bottender: {
-          lock,
-        },
-      });
-    } else {
-      context.setState({
-        bottender: {
-          lock: null,
-        },
-      });
-    }
-
-    return probablyPrompt;
-  };
-
-  if (dialogName) {
-    nextStep.name = dialogName;
-  }
-
-  return nextStep;
-}
-
-function prompt(property, { props } = {}) {
+function promptField(name) {
   return {
     isPrompt: true,
-    property,
-    props,
+    name,
   };
 }
 
-function run(Fn) {
-  return async context => {
+/**
+ * Set teh value of the field
+ */
+function setField(context, name, value) {
+  context.setState({
+    bottender: {
+      lock: {
+        ...context.state.bottender.lock,
+        props: {
+          ...context.state.bottender.lock.props,
+          [name]: value,
+        },
+      },
+    },
+  });
+}
+
+/**
+ * Delete the value of the field
+ */
+function deleteField(context, nameOrNames) {
+  if (Array.isArray(nameOrNames)) {
+    const names = nameOrNames;
+    names.forEach(name => {
+      setField(context, name, undefined);
+    })
+    return;
+  }
+  const name = nameOrNames;
+  setField(context, name, undefined);
+}
+
+/**
+ * Runner extension
+ */
+function run(action) {
+  registerAction('App', action);
+
+  return async (context, props) => {
+    // check if lock exists
     const lock = get(context.state, 'bottender.lock');
 
-    let nextDialog;
+    let entryAction = action;
+    let entryProps = props;
 
     if (lock) {
-      nextDialog = continueDialog(Fn);
-    } else {
-      nextDialog = Fn;
+      // TODO: we should handle more use case here, for example, line datetime payload
+      if (context.event.isText) {
+        const lockAction = getAction(lock.actionName);
+        if (lockAction) {
+          entryAction = lockAction;
+          entryProps = {
+            ...lock.props,
+            [lock.promptName]: context.event.text.trim(),
+          }
+          setField(context, lock.promptName, context.event.text);
+        }
+      }
+    } 
+
+    debugAction(`Current Action: ${entryAction.name || 'Anonymous'}`);
+    let next = await entryAction(context, entryProps);
+
+    while (typeof next === 'function') {
+      debugAction(`Current Action: ${next.name || 'Anonymous'}`);
+      next = await next(context, {});
     }
 
-    do {
-      debug(`Current Dialog: ${nextDialog.name || 'Anonymous'}`);
-      // eslint-disable-next-line no-await-in-loop
-      nextDialog = await nextDialog(context, {});
-    } while (typeof nextDialog === 'function');
+    if (next && next.isPrompt) {
+      const prompt = next;
+
+      const newLock = {
+        // FIXME: avoid using state to label current action
+        actionName: context.state.currentAction, 
+        promptName: prompt.name,
+        props: lock ? context.state.bottender.lock.props : {},
+      };
+
+      context.setState({
+        bottender: {
+          lock: newLock,
+        },
+      });
+
+      return;
+    } 
+
+    if (lock) {
+      context.setState({
+        bottender: {
+          lock: null,
+        },
+      });
+    }
+    
+    return next;
   };
 }
 
 module.exports = {
-  addDialog,
-  beginDialog,
-  continueDialog,
-  prompt,
+  registerAction,
+  getAction,
+
+  promptField,
+  setField,
+  deleteField,
+
   run,
 };

@@ -1,5 +1,5 @@
 {
-  "name": "bottender-proposal-multi-turns",
+  "name": "@bottender/proposal-conversation",
   "version": "0.0.4",
   "description": "",
   "main": "index.js",
@@ -8,5 +8,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "lodash": "^4.17.15"
+  }
 }

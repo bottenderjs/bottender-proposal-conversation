@@ -25,7 +25,7 @@ function getAction(name) {
  * Prompt data structure
  */
 
-function promptField(name) {
+function prompt(name) {
   return {
     isPrompt: true,
     name,
@@ -55,9 +55,9 @@ function setField(context, name, value) {
 function deleteField(context, nameOrNames) {
   if (Array.isArray(nameOrNames)) {
     const names = nameOrNames;
-    names.forEach(name => {
+    names.forEach((name) => {
       setField(context, name, undefined);
-    })
+    });
     return;
   }
   const name = nameOrNames;
@@ -86,17 +86,18 @@ function run(action) {
           entryProps = {
             ...lock.props,
             [lock.promptName]: context.event.text.trim(),
-          }
+          };
           setField(context, lock.promptName, context.event.text);
         }
       }
-    } 
+    }
 
     debugAction(`Current Action: ${entryAction.name || 'Anonymous'}`);
     let next = await entryAction(context, entryProps);
 
     while (typeof next === 'function') {
       debugAction(`Current Action: ${next.name || 'Anonymous'}`);
+      // eslint-disable-next-line no-await-in-loop
       next = await next(context, {});
     }
 
@@ -105,7 +106,7 @@ function run(action) {
 
       const newLock = {
         // FIXME: avoid using state to label current action
-        actionName: context.state.currentAction, 
+        actionName: context.state.currentAction,
         promptName: prompt.name,
         props: lock ? context.state.bottender.lock.props : {},
       };
@@ -117,7 +118,7 @@ function run(action) {
       });
 
       return;
-    } 
+    }
 
     if (lock) {
       context.setState({
@@ -126,7 +127,7 @@ function run(action) {
         },
       });
     }
-    
+
     return next;
   };
 }
@@ -135,7 +136,7 @@ module.exports = {
   registerAction,
   getAction,
 
-  promptField,
+  prompt,
   setField,
   deleteField,
 

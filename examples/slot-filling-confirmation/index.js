@@ -20,7 +20,7 @@ registerAction('AskNameAndPhone', async function AskNameAndPhone(
     const name = `${props.name.slice(0, 27)}...`;
     setField(context, 'name', name);
     await context.sendText(
-      `Name can't be over 30 chars. Set your name to ${name}`
+      `Name can't be more than 30 characters. Set your name to ${name}`
     );
   }
 
@@ -31,7 +31,7 @@ registerAction('AskNameAndPhone', async function AskNameAndPhone(
 
   if (props.phone && props.phone.length !== 10) {
     await context.sendText(
-      `Your input ${props.phone} is invalid. Please retype your phone again:`
+      `Your input ${props.phone} is invalid. Please retype your phone again (10 digits):`
     );
     return prompt('phone');
   }
@@ -53,7 +53,7 @@ registerAction('AskNameAndPhone', async function AskNameAndPhone(
     return prompt('name');
   } else if (props.confirm === 'phone') {
     deleteField(context, ['phone', 'confirm']);
-    await context.sendText('Please retype your phone:');
+    await context.sendText('Please retype your phone again (10 digits):');
     return prompt('phone');
   } else if (props.confirm === 'both') {
     deleteField(context, ['confirm', 'name', 'phone']);

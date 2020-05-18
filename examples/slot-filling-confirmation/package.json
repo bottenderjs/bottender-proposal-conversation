@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "start": "bottender start",
+    "dev": "bottender dev"
+  },
+  "dependencies": {
+    "bottender": "^1.4.5"
+  }
+}

@@ -2,6 +2,7 @@ const { router, text } = require('bottender/router');
 
 const { registerAction, getAction, run, prompt } = require('../..');
 
+// Register the action before handling events
 registerAction('AskLikeCheeseOrNot', async function AskLikeCheeseOrNot(
   context,
   props
@@ -17,7 +18,6 @@ registerAction('AskLikeCheeseOrNot', async function AskLikeCheeseOrNot(
     await context.sendText('You said no, that is too bad.');
   } else {
     await context.sendText('Sorry I did not understand.');
-    return getAction('App');
   }
 });
 
@@ -26,5 +26,9 @@ async function Hi(context) {
 }
 
 module.exports = run(function App() {
-  return router([text('hi', Hi), text('*', getAction('AskLikeCheeseOrNot'))]);
+  return router([
+    text('hi', Hi),
+    // Use the getAction function to get the registered action
+    text('*', getAction('AskLikeCheeseOrNot')),
+  ]);
 });

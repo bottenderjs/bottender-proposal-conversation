@@ -3,21 +3,20 @@ const { router, text } = require('bottender/router');
 const { registerAction, getAction, run, prompt } = require('../..');
 
 registerAction(
-  'AskLikeCheeseOrNotByTextActions',
-  async function AskLikeCheeseOrNotByTextActions(context, props) {
+  'AskLikeCheeseOrNotByTextQuickReplies',
+  async function AskLikeCheeseOrNotByTextQuickReplies(context, props) {
     if (!props.result) {
       await context.sendConfirmTemplate('Do you like cheese?', {
-        text: 'Do you like cheese?',
-        actions: [
+        quickReplies: [
           {
-            type: 'message',
-            label: 'Yes',
-            text: 'yes',
+            contentType: 'text',
+            title: 'yes',
+            payload: 'yes',
           },
           {
             type: 'message',
-            label: 'No',
-            text: 'no',
+            title: 'no',
+            payload: 'no',
           },
         ],
       });
@@ -34,7 +33,7 @@ registerAction(
   }
 );
 
-registerAction('AskLikeCheeseOrNotByTextActions', {
+registerAction('AskLikeCheeseOrNotByTextQuickReplies', {
   getProps: ({ key, context, prevProps }) => {
     if (key === 'result') {
       if (context.event.isPayload) {
@@ -90,6 +89,6 @@ module.exports = run(function App() {
   return router([
     text('hi', Hi),
     text('payload', getAction('AskLikeCheeseOrNotByPayloadActions')),
-    text('*', getAction('AskLikeCheeseOrNotByTextActions')),
+    text('*', getAction('AskLikeCheeseOrNotByTextQuickReplies')),
   ]);
 });

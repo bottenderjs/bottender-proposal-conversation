@@ -1,28 +1,50 @@
 const _debug = require('debug');
 const get = require('lodash/get');
+const invariant = require('invariant');
 
 const debugAction = _debug('bottender:proposal:conversation');
 
-const actions = {};
+// an object map to store actions and their getProps
+const actions = Object.create(null);
 
-/**
- * Register and get action
- */
-function registerAction(name, action) {
-  actions[name] = action;
-}
-
-function getAction(name) {
-  return function SetCurrentAction(context, props) {
-    // FIXME: avoid using state to label current action
-    context.setState({ currentAction: name });
-
-    return actions[name](context, props);
+// default behavior is to attach new key to the props when receiving text events
+function defaultGetProps({ key, context, prevProps }) {
+  return {
+    ...prevProps,
+    [key]: context.event.text,
   };
 }
 
 /**
- * Prompt data structure
+ * register the action
+ */
+function registerAction(name, action) {
+  if (typeof action === 'function') {
+    actions[name] = {
+      action,
+      getProps: defaultGetProps,
+    };
+  } else {
+    actions[name] = action;
+  }
+}
+
+function getAction(name) {
+  invariant(
+    actions[name] && typeof actions[name].action === 'function',
+    `The ${name} action is not registered.`
+  );
+
+  return function SetCurrentAction(context, props) {
+    // FIXME: avoid using state to label current action
+    context.setState({ currentAction: name });
+
+    return actions[name].action(context, props);
+  };
+}
+
+/**
+ * data structure of prompt
  */
 
 function prompt(name) {
@@ -32,25 +54,29 @@ function prompt(name) {
   };
 }
 
-/**
- * Set teh value of the field
- */
-function setField(context, name, value) {
+function setProps(context, props) {
   context.setState({
     bottender: {
       lock: {
         ...context.state.bottender.lock,
-        props: {
-          ...context.state.bottender.lock.props,
-          [name]: value,
-        },
+        props,
       },
     },
   });
 }
 
 /**
- * Delete the value of the field
+ * set the value of the field
+ */
+function setField(context, name, value) {
+  setProps(context, {
+    ...context.state.bottender.lock.props,
+    [name]: value,
+  });
+}
+
+/**
+ * delete the value of the field
  */
 function deleteField(context, nameOrNames) {
   if (Array.isArray(nameOrNames)) {
@@ -65,7 +91,7 @@ function deleteField(context, nameOrNames) {
 }
 
 /**
- * Runner extension
+ * runner extension of Bottender
  */
 function run(action) {
   registerAction('App', action);
@@ -82,12 +108,14 @@ function run(action) {
       if (context.event.isText) {
         const lockAction = getAction(lock.actionName);
         if (lockAction) {
+          const { getProps } = actions[lock.actionName];
           entryAction = lockAction;
-          entryProps = {
-            ...lock.props,
-            [lock.promptName]: context.event.text.trim(),
-          };
-          setField(context, lock.promptName, context.event.text);
+          entryProps = getProps({
+            key: lock.promptName,
+            context,
+            prevProps: lock.props,
+          });
+          setProps(context, entryProps);
         }
       }
     }
@@ -102,12 +130,12 @@ function run(action) {
     }
 
     if (next && next.isPrompt) {
-      const prompt = next;
+      const returnPrompt = next;
 
       const newLock = {
         // FIXME: avoid using state to label current action
         actionName: context.state.currentAction,
-        promptName: prompt.name,
+        promptName: returnPrompt.name,
         props: lock ? context.state.bottender.lock.props : {},
       };
 

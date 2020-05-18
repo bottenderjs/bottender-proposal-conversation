@@ -16,7 +16,7 @@ registerAction('AskNameAndPhone', async function AskNameAndPhone(
     return prompt('name');
   }
 
-  if (props.name && props.name.length > 30) {
+  if (props.name.length > 30) {
     const name = `${props.name.slice(0, 27)}...`;
     setField(context, 'name', name);
     await context.sendText(

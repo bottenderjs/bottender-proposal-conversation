@@ -1,16 +1,19 @@
 {
   "name": "@bottender/proposal-conversation",
   "version": "0.0.4",
-  "description": "",
+  "description": "A candidate of the Bottender conversation module",
   "main": "index.js",
   "scripts": {
     "lint": "eslint *.js examples",
     "lint:fix": "yarn lint:fix:md && yarn lint --fix",
     "lint:fix:md": "prettier --write **/*.md"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "bottender",
+    "proposal",
+    "conversation"
+  ],
+  "license": "MIT",
   "dependencies": {
     "debug": "^4.1.1",
     "invariant": "^2.2.4",

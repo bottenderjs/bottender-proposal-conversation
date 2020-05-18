@@ -1,12 +1,12 @@
-# LINE Quick Replies
+# LINE Datetime Picker
 
 ## Install and Run
 
 Download this example or clone [bottender-proposal-conversation](https://github.com/Yoctol/bottender-proposal-conversation).
 
 ```sh
-curl https://codeload.github.com/Yoctol/bottender-proposal-conversation/tar.gz/master | tar -xz --strip=2 bottender-proposal-conversation-master/examples/line-quick-replies
-cd line-quick-replies
+curl https://codeload.github.com/Yoctol/bottender-proposal-conversation/tar.gz/master | tar -xz --strip=2 bottender-proposal-conversation-master/examples/line-datetime-picker
+cd line-datetime-picker
 ```
 
 Install dependencies:

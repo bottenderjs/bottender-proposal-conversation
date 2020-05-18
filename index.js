@@ -47,10 +47,10 @@ function getAction(name) {
  * data structure of prompt
  */
 
-function prompt(name) {
+function prompt(key) {
   return {
     isPrompt: true,
-    name,
+    key,
   };
 }
 
@@ -135,7 +135,7 @@ function run(action) {
       const newLock = {
         // FIXME: avoid using state to label current action
         actionName: context.state.currentAction,
-        promptName: returnPrompt.name,
+        promptName: returnPrompt.key,
         props: lock ? context.state.bottender.lock.props : {},
       };
 

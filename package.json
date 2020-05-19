@@ -1,6 +1,6 @@
 {
   "name": "@bottender/proposal-conversation",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "A candidate of the Bottender conversation module",
   "main": "index.js",
   "scripts": {

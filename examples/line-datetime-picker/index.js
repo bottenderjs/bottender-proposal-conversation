@@ -1,6 +1,10 @@
 const { router, text } = require('bottender/router');
-
-const { registerAction, getAction, run, prompt } = require('../..');
+const {
+  registerAction,
+  getAction,
+  run,
+  prompt,
+} = require('@bottender/proposal-conversation');
 
 registerAction('AskDate', {
   getProps: ({ key, context, prevProps }) => {

@@ -4,6 +4,7 @@
     "dev": "bottender dev"
   },
   "dependencies": {
+    "@bottender/proposal-conversation": "^0.1.0",
     "bottender": "^1.4.5"
   }
 }

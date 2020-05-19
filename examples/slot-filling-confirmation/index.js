@@ -5,7 +5,7 @@ const {
   prompt,
   setField,
   deleteField,
-} = require('../..');
+} = require('@bottender/proposal-conversation');
 
 registerAction('AskNameAndPhone', async function AskNameAndPhone(
   context,

@@ -93,6 +93,15 @@ const action = getAction('AskLikeCheeseOrNot');
 
 ```js
 const { prompt } = require('@bottender/proposal-conversation');
+
+registerAction('AskName', async function AskName(context, props) {
+  if (!props.name) {
+    await context.sendText('Please type your name:');
+    return prompt('name');
+  }
+
+  await context.sendText(`Hi, ${props.name}`);
+});
 ```
 
 > **Note:** `prompt` can only be used inside the registered action.

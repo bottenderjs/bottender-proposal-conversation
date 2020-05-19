@@ -34,16 +34,13 @@ registerAction(
   }
 );
 
-registerAction('AskLikeCheeseOrNotByTextActions', {
+registerAction('AskLikeCheeseOrNotByPayloadActions', {
   getProps: ({ key, context, prevProps }) => {
-    if (key === 'result') {
-      if (context.event.isPayload) {
-        const { payload } = context.event;
-        return {
-          ...prevProps,
-          result: payload === 'YES' ? 'yes' : 'no',
-        };
-      }
+    if (key === 'result' && context.event.isPayload) {
+      return {
+        ...prevProps,
+        result: context.event.payload === 'YES' ? 'yes' : 'no',
+      };
     }
     return {
       ...prevProps,
@@ -82,13 +79,8 @@ registerAction('AskLikeCheeseOrNotByTextActions', {
   },
 });
 
-async function Hi(context) {
-  await context.sendText('hi');
-}
-
 module.exports = run(function App() {
   return router([
-    text('hi', Hi),
     text('payload', getAction('AskLikeCheeseOrNotByPayloadActions')),
     text('*', getAction('AskLikeCheeseOrNotByTextActions')),
   ]);

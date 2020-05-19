@@ -105,18 +105,16 @@ function run(action) {
 
     if (lock) {
       // TODO: we should handle more use case here, for example, line datetime payload
-      if (context.event.isText) {
-        const lockAction = getAction(lock.actionName);
-        if (lockAction) {
-          const { getProps } = actions[lock.actionName];
-          entryAction = lockAction;
-          entryProps = getProps({
-            key: lock.promptName,
-            context,
-            prevProps: lock.props,
-          });
-          setProps(context, entryProps);
-        }
+      const lockAction = getAction(lock.actionName);
+      if (lockAction) {
+        const { getProps } = actions[lock.actionName];
+        entryAction = lockAction;
+        entryProps = getProps({
+          key: lock.promptName,
+          context,
+          prevProps: lock.props,
+        });
+        setProps(context, entryProps);
       }
     }
 

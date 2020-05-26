@@ -1,12 +1,11 @@
 const { router, text } = require('bottender/router');
 const {
   registerAction,
-  getAction,
   run,
   prompt,
 } = require('@bottender/proposal-conversation');
 
-registerAction('AskDate', {
+const AskDate = registerAction('AskDate', {
   getProps: ({ key, context, prevProps }) => {
     if (
       key === 'date' &&
@@ -47,7 +46,7 @@ registerAction('AskDate', {
   },
 });
 
-registerAction('AskTime', {
+const AskTime = registerAction('AskTime', {
   getProps: ({ key, context, prevProps }) => {
     if (
       key === 'time' &&
@@ -88,7 +87,7 @@ registerAction('AskTime', {
   },
 });
 
-registerAction('AskDatetime', {
+const AskDatetime = registerAction('AskDatetime', {
   getProps: ({ key, context, prevProps }) => {
     if (
       key === 'datetime' &&
@@ -131,8 +130,8 @@ registerAction('AskDatetime', {
 
 module.exports = run(function App() {
   return router([
-    text('date', getAction('AskDate')),
-    text('time', getAction('AskTime')),
-    text('*', getAction('AskDatetime')),
+    text('date', AskDate),
+    text('time', AskTime),
+    text('*', AskDatetime),
   ]);
 });

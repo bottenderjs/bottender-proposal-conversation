@@ -15,32 +15,45 @@ function defaultGetProps({ key, context, prevProps }) {
   };
 }
 
-/**
- * register the action
- */
-function registerAction(name, action) {
-  if (typeof action === 'function') {
-    actions[name] = {
-      action,
-      getProps: defaultGetProps,
-    };
-  } else {
-    actions[name] = action;
-  }
-}
-
 function getAction(name) {
   invariant(
     actions[name] && typeof actions[name].action === 'function',
     `The ${name} action is not registered.`
   );
 
-  return function SetCurrentAction(context, props) {
+  return actions[name].action;
+}
+
+/**
+ * register the action
+ */
+function registerAction(name, options) {
+  let action;
+  if (typeof options === 'function') {
+    action = options;
+  } else {
+    action = options.action;
+  }
+
+  function SetCurrentAction(context, props) {
     // FIXME: avoid using state to label current action
     context.setState({ currentAction: name });
+    return action(context, props);
+  }
 
-    return actions[name].action(context, props);
-  };
+  if (typeof options === 'function') {
+    actions[name] = {
+      action: SetCurrentAction,
+      getProps: defaultGetProps,
+    };
+  } else {
+    actions[name] = {
+      ...options,
+      action: SetCurrentAction,
+    };
+  }
+
+  return getAction(name);
 }
 
 /**
@@ -127,7 +140,7 @@ function run(action) {
       next = await next(context, {});
     }
 
-    if (next && next.isPrompt) {
+    if (next && next.isPrompt && context.state.currentAction) {
       const returnPrompt = next;
 
       const newLock = {

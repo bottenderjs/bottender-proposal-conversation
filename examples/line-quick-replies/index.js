@@ -1,11 +1,10 @@
 const {
   registerAction,
-  getAction,
   run,
   prompt,
 } = require('@bottender/proposal-conversation');
 
-registerAction(
+const AskLikeCheeseOrNotByTextQuickReplies = registerAction(
   'AskLikeCheeseOrNotByTextQuickReplies',
   async function AskLikeCheeseOrNotByTextQuickReplies(context, props) {
     if (!props.result) {
@@ -45,5 +44,5 @@ registerAction(
 );
 
 module.exports = run(function App() {
-  return getAction('AskLikeCheeseOrNotByTextQuickReplies');
+  return AskLikeCheeseOrNotByTextQuickReplies;
 });
